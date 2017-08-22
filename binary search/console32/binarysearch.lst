@@ -1,0 +1,206 @@
+Microsoft (R) Macro Assembler Version 11.00.50727.1	    01/14/14 22:51:55
+binarysearch.asm					     Page 1 - 1
+
+
+				.386
+				.MODEL FLAT
+				.STACK 4096
+				ExitProcess PROTO NEAR32 stdcall, dwExitCode:dword
+				include io.h
+			      C ; IO.H -- header file for I/O macros
+			      C ; 32-bit version for flat memory model
+			      C ; R. Detmer   last revised 8/2000
+			      C .NOLIST     ; turn off listing
+			      C .LIST        ; begin listing
+			      C 
+
+ 00000000			.DATA
+ 00000000 FFFFFFF8		array		DWORD	-8,0,12,70,110,155,199,778
+	   00000000
+	   0000000C
+	   00000046
+	   0000006E
+	   0000009B
+	   000000C7
+	   0000030A
+ 00000020 50 6C 65 61 73	prompt		BYTE	"Please input the number to search: ",0
+	   65 20 69 6E 70
+	   75 74 20 74 68
+	   65 20 6E 75 6D
+	   62 65 72 20 74
+	   6F 20 73 65 61
+	   72 63 68 3A 20
+	   00
+ 00000044  0000000B [		instring	BYTE	11 DUP (?)
+	    00
+	   ]
+ 0000004F 59 6F 79 72 20	foundtext	BYTE	"Yoyr number is in index:"
+	   6E 75 6D 62 65
+	   72 20 69 73 20
+	   69 6E 20 69 6E
+	   64 65 78 3A
+ 00000067  0000000B [		outstring	BYTE	11 DUP (?)
+	    00
+	   ]
+ 00000072  0D 0A 00					BYTE	0dh,0ah,0
+ 00000075 4E 4F 54 20 46	notfoundtext	BYTE	"NOT FOUND!",0dh,0ah,0
+	   4F 55 4E 44 21
+	   0D 0A 00
+
+ 00000000			.CODE
+ 00000000			_main:
+							output	prompt
+							input	instring, 11
+							atod	instring
+ 0000002E  50						push	eax
+ 0000002F  B8 00000007					mov		eax, 7
+ 00000034  50						push	eax
+ 00000035  B8 00000000					mov		eax, 0
+ 0000003A  50						push	eax
+ 0000003B  8D 05 00000000 R				lea		eax, array
+ 00000041  50						push	eax
+ 00000042  E8 0000003E					call	search
+ 00000047  83 C4 0C					add		esp, 12
+ 0000004A  83 F8 FF					cmp		eax, -1
+ 0000004D  74 21					je		notfound
+							dtoa	outstring, eax
+							output	foundtext
+ 0000006E  EB 0E					jmp		done
+ 00000070			notfound:
+							output	notfoundtext
+ 0000007E			done:		
+							invoke	ExitProcess, 0
+							
+
+ 00000085			search		PROC
+ 00000085  55						push	ebp
+ 00000086  8B EC					mov		ebp, esp
+ 00000088  53						push	ebx
+ 00000089  51						push	ecx
+ 0000008A  52						push	edx
+ 0000008B  56						push	esi
+ 0000008C  9C						pushfd
+
+ 0000008D  8B 4D 0C					mov		ecx, [ebp+12]		; first
+ 00000090  8B 55 10					mov		edx, [ebp+16]		; last
+ 00000093  3B CA					cmp		ecx, edx
+ 00000095  7E 07					jle		else1
+ 00000097  B8 FFFFFFFF					mov		eax, -1
+ 0000009C  EB 4A					jmp		finishproc
+ 0000009E			else1:		
+ 0000009E  2B D1					sub		edx,ecx
+ 000000A0  D1 EA					shr		edx, 1
+ 000000A2  03 D1					add		edx, ecx
+ 000000A4  8B CA					mov		ecx, edx			; edx contains mid
+ 000000A6  C1 E1 02					shl		ecx, 2
+ 000000A9  8B 75 08					mov		esi, [ebp+8]
+ 000000AC  8B 34 31					mov		esi, [esi+ecx]
+ 000000AF  3B 75 14					cmp		esi, [ebp+20]
+ 000000B2  7F 06					jg		else2
+ 000000B4  7C 1B					jl		else3
+ 000000B6  8B C2					mov		eax, edx			; if equal
+ 000000B8  EB 2E					jmp		finishproc
+ 000000BA			else2:		
+ 000000BA  FF 75 14					push	[ebp+20]
+ 000000BD  8B CA					mov		ecx, edx
+ 000000BF  49						dec		ecx
+ 000000C0  51						push	ecx
+ 000000C1  FF 75 0C					push	[ebp+12]
+ 000000C4  FF 75 08					push	[ebp+8]
+ 000000C7  E8 FFFFFFB9					call	search
+ 000000CC  83 C4 10					add		esp, 16
+ 000000CF  EB 17					jmp		finishproc
+ 000000D1			else3:
+ 000000D1  FF 75 14					push	[ebp+20]
+ 000000D4  8B CA					mov		ecx, edx
+ 000000D6  41						inc		ecx
+ 000000D7  FF 75 10					push	[ebp+16]
+ 000000DA  51						push	ecx
+ 000000DB  FF 75 08					push	[ebp+8]
+ 000000DE  E8 FFFFFFA2					call	search
+ 000000E3  83 C4 10					add		esp, 16
+ 000000E6  EB 00					jmp		finishproc
+
+ 000000E8			finishproc:	
+ 000000E8  9D						popfd
+ 000000E9  5E						pop		esi
+ 000000EA  5A						pop		edx
+ 000000EB  59						pop		ecx
+ 000000EC  5B						pop		ebx
+ 000000ED  5D						pop		ebp
+ 000000EE  C3						ret
+ 000000EF			search		ENDP
+				public	_main
+				END
+
+Microsoft (R) Macro Assembler Version 11.00.50727.1	    01/14/14 22:51:55
+binarysearch.asm					     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+atod . . . . . . . . . . . . . .	Proc
+atoi . . . . . . . . . . . . . .	Proc
+dtoa . . . . . . . . . . . . . .	Proc
+input  . . . . . . . . . . . . .	Proc
+itoa . . . . . . . . . . . . . .	Proc
+output . . . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000082 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000EF DWord	  Public  'CODE'	
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+search . . . . . . . . . . . . .	P Near	 00000085 _TEXT	Length= 0000006A Public
+  else1  . . . . . . . . . . . .	L Near	 0000009E _TEXT	
+  else2  . . . . . . . . . . . .	L Near	 000000BA _TEXT	
+  else3  . . . . . . . . . . . .	L Near	 000000D1 _TEXT	
+  finishproc . . . . . . . . . .	L Near	 000000E8 _TEXT	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+_main  . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
+array  . . . . . . . . . . . . .	DWord	 00000000 _DATA	
+atodproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+atoiproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+done . . . . . . . . . . . . . .	L Near	 0000007E _TEXT	
+dtoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+foundtext  . . . . . . . . . . .	Byte	 0000004F _DATA	
+inproc . . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+instring . . . . . . . . . . . .	Byte	 00000044 _DATA	
+itoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+notfoundtext . . . . . . . . . .	Byte	 00000075 _DATA	
+notfound . . . . . . . . . . . .	L Near	 00000070 _TEXT	
+outproc  . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+outstring  . . . . . . . . . . .	Byte	 00000067 _DATA	
+prompt . . . . . . . . . . . . .	Byte	 00000020 _DATA	
+
+	   0 Warnings
+	   0 Errors

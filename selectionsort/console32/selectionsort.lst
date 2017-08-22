@@ -1,0 +1,177 @@
+Microsoft (R) Macro Assembler Version 11.00.50727.1	    01/13/14 16:47:21
+selectionsort.asm					     Page 1 - 1
+
+
+				.386
+				.MODEL FLAT
+				.STACK 10000
+				ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD
+				INCLUDE io.h
+			      C ; IO.H -- header file for I/O macros
+			      C ; 32-bit version for flat memory model
+			      C ; R. Detmer   last revised 8/2000
+			      C .NOLIST     ; turn off listing
+			      C .LIST        ; begin listing
+			      C 
+
+ 00000000			.DATA
+ 00000000 FFFFFFAD		array		DWORD	-83,21,33,10,90,2
+	   00000015
+	   00000021
+	   0000000A
+	   0000005A
+	   00000002
+ 00000018  0000000B [		outstring	BYTE	11 DUP (?)
+	    00
+	   ]
+ 00000023  0D 0A 00					BYTE	0dh,0ah,0
+
+
+ 00000000			.CODE
+ 00000000			_main:
+ 00000000  8D 1D 00000000 R				lea		ebx, array
+ 00000006  53						push	ebx
+ 00000007  E8 0000003C					call	selection
+ 0000000C  83 C4 04					add		esp, 4
+ 0000000F  B9 00000000					mov		ecx, 0				; length of array is 6
+ 00000014  83 F9 06		print:		cmp		ecx, 6
+ 00000017  73 28					jae		done
+ 00000019  8B C1					mov		eax,ecx
+ 0000001B  C1 E0 02					shl		eax,2
+							dtoa	outstring, [ebx+eax]
+							output	outstring
+ 0000003E  41						inc		ecx
+ 0000003F  EB D3					jmp		print
+ 00000041			done:		invoke	ExitProcess, 0
+
+ 00000048			selection	PROC
+ 00000048  55						push	ebp
+ 00000049  8B EC					mov		ebp, esp
+ 0000004B  83 EC 04					SUB		eSp, 4
+ 0000004E  50						push	eax
+ 0000004F  53						push	ebx
+ 00000050  51						push	ecx
+ 00000051  52						push	edx
+ 00000052  56						push	esi
+ 00000053  9C						pushfd
+							
+ 00000054  B9 00000005					mov		ecx, 5				; length of array
+ 00000059  8B 75 08					mov		esi, [ebp+8]
+ 0000005C  83 F9 00		fori:		cmp		ecx, 0
+ 0000005F  7E 4F					jle		finish
+ 00000061  C7 45 FC					mov		dword ptr [ebp-4], 0
+	   00000000
+ 00000068  BA 00000001					mov		edx, 1
+ 0000006D  3B D1		forj:		cmp		edx, ecx
+ 0000006F  7F 1D					jg		looper
+ 00000071  8B FA					mov		edi,edx
+ 00000073  D1 E7					shl		edi, 1
+ 00000075  03 FF					add		edi, edi
+ 00000077  8B 04 37					mov		eax,[esi+edi]
+ 0000007A  8B 7D FC					mov		edi, [ebp-4]
+ 0000007D  D1 E7					shl		edi, 1
+ 0000007F  03 FF					add		edi, edi
+ 00000081  8B 1C 37					mov		ebx, [esi+edi]
+ 00000084  3B C3					cmp		eax, ebx
+ 00000086  7E 03					jng		looper2
+ 00000088  89 55 FC					mov		[ebp-4], edx
+ 0000008B  42			looper2:	inc		edx
+ 0000008C  EB DF					jmp		forj
+ 0000008E			looper:		
+ 0000008E  8B 7D FC					mov		edi,[ebp-4]			; swap
+ 00000091  D1 E7					shl		edi, 1
+ 00000093  03 FF					add		edi, edi
+ 00000095  8B 04 37					mov		eax,[esi+edi]		; a[maxindex] is in eax
+ 00000098  8B F9					mov		edi, ecx
+ 0000009A  D1 E7					shl		edi, 1
+ 0000009C  03 FF					add		edi, edi
+ 0000009E  8B 1C 37					mov		ebx, [esi+edi]		;a[i] is in ebx
+ 000000A1  89 04 37					mov		[esi+edi], eax
+ 000000A4  8B 7D FC					mov		edi,[ebp-4]
+ 000000A7  C1 E7 02					shl		edi, 2
+ 000000AA  89 1C 37					mov		[esi+edi], ebx
+ 000000AD  49						dec		ecx
+ 000000AE  EB AC					jmp		fori
+ 000000B0			finish:
+ 000000B0  9D						popfd
+ 000000B1  5E						pop		esi
+ 000000B2  5A						pop		edx
+ 000000B3  59						pop		ecx
+ 000000B4  5B						pop		ebx
+ 000000B5  58						pop		eax
+ 000000B6  8B E5					mov		esp, ebp
+ 000000B8  5D						pop		ebp
+ 000000B9  C3						ret
+ 000000BA			selection	ENDP
+				PUBLIC	_main
+				END
+
+								
+Microsoft (R) Macro Assembler Version 11.00.50727.1	    01/13/14 16:47:21
+selectionsort.asm					     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+atod . . . . . . . . . . . . . .	Proc
+atoi . . . . . . . . . . . . . .	Proc
+dtoa . . . . . . . . . . . . . .	Proc
+input  . . . . . . . . . . . . .	Proc
+itoa . . . . . . . . . . . . . .	Proc
+output . . . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00002710 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000026 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000BA DWord	  Public  'CODE'	
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+selection  . . . . . . . . . . .	P Near	 00000048 _TEXT	Length= 00000072 Public
+  fori . . . . . . . . . . . . .	L Near	 0000005C _TEXT	
+  forj . . . . . . . . . . . . .	L Near	 0000006D _TEXT	
+  looper2  . . . . . . . . . . .	L Near	 0000008B _TEXT	
+  looper . . . . . . . . . . . .	L Near	 0000008E _TEXT	
+  finish . . . . . . . . . . . .	L Near	 000000B0 _TEXT	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+_main  . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
+array  . . . . . . . . . . . . .	DWord	 00000000 _DATA	
+atodproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+atoiproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+done . . . . . . . . . . . . . .	L Near	 00000041 _TEXT	
+dtoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+inproc . . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+itoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+outproc  . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+outstring  . . . . . . . . . . .	Byte	 00000018 _DATA	
+print  . . . . . . . . . . . . .	L Near	 00000014 _TEXT	
+
+	   0 Warnings
+	   0 Errors

@@ -1,0 +1,151 @@
+Microsoft (R) Macro Assembler Version 11.00.50727.1	    12/16/13 09:19:53
+BubbleSort.asm						     Page 1 - 1
+
+
+				.386
+				.MODEL FLAT
+				.STACK 40960
+				ExitProcess PROTO NEAR32 stdcall ,dwExitCode:DWORD
+
+				include io.h
+			      C ; IO.H -- header file for I/O macros
+			      C ; 32-bit version for flat memory model
+			      C ; R. Detmer   last revised 8/2000
+			      C .NOLIST     ; turn off listing
+			      C .LIST        ; begin listing
+			      C 
+
+ 00000000			.DATA
+ 00000000 0000002D		array		dword	45 ,633 ,11 ,2 ,140 ,98 , 94 DUP (?)
+	   00000279
+	   0000000B
+	   00000002
+	   0000008C
+	   00000062
+	   0000005E [
+	    00000000
+	   ]
+ 00000190  0000000B [		outstring	BYTE	11 DUP (?)
+	    00
+	   ]
+ 0000019B  0D 0A 00					BYTE	0Dh,0Ah,0
+
+
+ 00000000			.CODE
+ 00000000			main:
+ 00000000  8D 1D 00000000 R				lea		ebx ,array
+ 00000006  53						push	ebx
+ 00000007  E8 00000039					call	bubblesort
+ 0000000C  83 C4 04					add		esp ,4
+ 0000000F  8D 1D 00000000 R				lea		ebx ,array
+ 00000015  B9 00000005					mov		ecx ,5
+ 0000001A			print:		
+							dtoa	outstring ,[ebx]
+							output	outstring
+ 00000039  83 C3 04					add		ebx ,4
+ 0000003C  E2 DC					loop	print
+							invoke	ExitProcess ,0
+							
+ 00000045			bubblesort	PROC
+ 00000045  55						push	ebp
+ 00000046  8B EC					mov		ebp ,esp
+ 00000048  50						push	eax
+ 00000049  53						push	ebx
+ 0000004A  51						push	ecx
+ 0000004B  52						push	edx
+ 0000004C  B9 00000005					mov		ecx ,5		; i
+ 00000051  E3 26					jecxz	endfori
+ 00000053  8B 45 08					mov		eax ,[ebp+8]
+ 00000056  BA 00000000		fori:		mov		edx ,0				; j
+ 0000005B  3B D1		forj:		cmp		edx ,ecx
+ 0000005D  74 15					je		endforj	
+ 0000005F  8B 18					mov		ebx , [eax]	
+ 00000061  3B 58 04					cmp		ebx ,[eax+4]
+ 00000064  7E 08					jng		ng
+ 00000066  8B 70 04					mov		esi , [eax+4]
+ 00000069  89 58 04					mov		[eax+4] , ebx
+ 0000006C  89 30					mov		[eax] ,esi
+ 0000006E			ng:			
+ 0000006E  83 C0 04					add		eax ,4
+ 00000071  42						inc		edx
+ 00000072  EB E7					jmp		forj
+ 00000074			endforj:	
+ 00000074  8B 45 08					mov		eax ,[ebp+8]
+ 00000077  E2 DD					loop	fori
+ 00000079  5A			endfori:	pop		edx
+ 0000007A  59						pop		ecx
+ 0000007B  5B						pop		ebx
+ 0000007C  58						pop		eax
+ 0000007D  5D						pop		ebp
+ 0000007E  C3						ret
+ 0000007F			bubblesort	ENDP
+
+				public main
+				END
+Microsoft (R) Macro Assembler Version 11.00.50727.1	    12/16/13 09:19:53
+BubbleSort.asm						     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+atod . . . . . . . . . . . . . .	Proc
+atoi . . . . . . . . . . . . . .	Proc
+dtoa . . . . . . . . . . . . . .	Proc
+input  . . . . . . . . . . . . .	Proc
+itoa . . . . . . . . . . . . . .	Proc
+output . . . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 0000A000 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000019E DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000007F DWord	  Public  'CODE'	
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+bubblesort . . . . . . . . . . .	P Near	 00000045 _TEXT	Length= 0000003A Public
+  fori . . . . . . . . . . . . .	L Near	 00000056 _TEXT	
+  forj . . . . . . . . . . . . .	L Near	 0000005B _TEXT	
+  ng . . . . . . . . . . . . . .	L Near	 0000006E _TEXT	
+  endforj  . . . . . . . . . . .	L Near	 00000074 _TEXT	
+  endfori  . . . . . . . . . . .	L Near	 00000079 _TEXT	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+array  . . . . . . . . . . . . .	DWord	 00000000 _DATA	
+atodproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+atoiproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+dtoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+inproc . . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+itoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+main . . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
+outproc  . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+outstring  . . . . . . . . . . .	Byte	 00000190 _DATA	
+print  . . . . . . . . . . . . .	L Near	 0000001A _TEXT	
+
+	   0 Warnings
+	   0 Errors
